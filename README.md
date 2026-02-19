@@ -1,13 +1,17 @@
-# Foto-assessment Woonveiligheid (MVP 1)
+# Foto-assessment Woonveiligheid (MVP)
 
 MVP voor LangerThuisinHuis waarmee bewoners of mantelzorgers foto's uploaden en een AI-gestuurde risico-analyse ontvangen voor:
 
 - `bathroom`
 - `stairs_hall`
+- `living_room`
+- `bedroom`
+- `kitchen`
 
 ## Functionaliteit
 
-- Begeleide uploadflow (`/assessment/new`) met ruimte-specifieke foto-prompts
+- Begeleide uploadflow met ruimte-specifieke checklist
+- Inline per checklist-item: foto maken of kiezen uit galerij
 - Uploadvalidatie (JPG/PNG, max 10MB per foto, max 5 foto's)
 - Verplichte consent checkbox
 - Server-side beeldoptimalisatie met `sharp`
@@ -17,7 +21,7 @@ MVP voor LangerThuisinHuis waarmee bewoners of mantelzorgers foto's uploaden en 
 - AI-analyse via OpenAI Responses API + Structured Outputs (Zod)
 - Resultaatpagina met:
   - risicoscore + label
-  - top issues
+  - belangrijkste aandachtspunten
   - aanbevolen acties
   - aanvullingsvragen
   - disclaimer
@@ -37,6 +41,7 @@ MVP voor LangerThuisinHuis waarmee bewoners of mantelzorgers foto's uploaden en 
 - `OPENAI_API_KEY` (verplicht)
 - `OPENAI_MODEL` (optioneel, default: `gpt-5.2`)
 - `TEMP_STORAGE_PATH` (optioneel, default: systeem tmp map + `ltih-assessment`)
+- `MAIN_SITE_URL` (optioneel, default: `https://langerthuisinhuis.nl`)
 
 Voorbeeld `.env.local`:
 
@@ -44,6 +49,7 @@ Voorbeeld `.env.local`:
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-5.2
 TEMP_STORAGE_PATH=/tmp/ltih-assessment
+MAIN_SITE_URL=https://langerthuisinhuis.nl
 ```
 
 ## Lokaal draaien

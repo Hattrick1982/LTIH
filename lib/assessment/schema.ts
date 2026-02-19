@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const RoomTypeSchema = z.enum(["bathroom", "stairs_hall"]);
+export const RoomTypeSchema = z.enum(["bathroom", "stairs_hall", "living_room", "bedroom", "kitchen"]);
 
 export const ActionSchema = z.object({
   action: z.string().min(1).max(240),
@@ -35,7 +35,7 @@ export const AssessmentResultSchema = z.object({
 
 export const AnalyzeRequestSchema = z.object({
   room_type: RoomTypeSchema,
-  file_ids: z.array(z.string().uuid()).min(1).max(5)
+  file_ids: z.array(z.string().uuid()).min(2).max(5)
 });
 
 export type RoomType = z.infer<typeof RoomTypeSchema>;

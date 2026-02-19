@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PrintNowButton } from "@/components/assessment/PrintNowButton";
 import { categoryLabel, riskLabel } from "@/lib/assessment/presentation";
+import { ASSESSMENT_DISCLAIMER_PARAGRAPHS } from "@/lib/assessment/disclaimer";
 import { readAssessmentRecord } from "@/lib/assessment/storage";
 
 export const runtime = "nodejs";
@@ -48,10 +49,12 @@ export default async function PrintableChecklistPage({
         </ol>
       </section>
 
-      <section className="card">
+      <section className="card disclaimer-card">
         <p>
-          <strong>Disclaimer:</strong> {assessment.result.disclaimer}
+          <strong>Disclaimer:</strong> {ASSESSMENT_DISCLAIMER_PARAGRAPHS[0]}
         </p>
+        <p>{ASSESSMENT_DISCLAIMER_PARAGRAPHS[1]}</p>
+        <p style={{ marginBottom: 0 }}>{ASSESSMENT_DISCLAIMER_PARAGRAPHS[2]}</p>
       </section>
 
       <section className="no-print" style={{ display: "flex", gap: "0.6rem" }}>
