@@ -1,0 +1,145 @@
+:root {
+  --bg: #f7f8f4;
+  --surface: #ffffff;
+  --text: #1b2a25;
+  --muted: #52615b;
+  --border: #d5ddd8;
+  --accent: #0f766e;
+  --accent-2: #c2410c;
+  --risk-low: #15803d;
+  --risk-medium: #b45309;
+  --risk-high: #b91c1c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at 10% 0%, #eaf3ef 0, #f7f8f4 55%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.btn {
+  border: 1px solid transparent;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #fff;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--border);
+}
+
+.label-low {
+  color: var(--risk-low);
+  border-color: #b9e4c8;
+  background: #effbf4;
+}
+
+.label-medium {
+  color: var(--risk-medium);
+  border-color: #f5d7af;
+  background: #fff8ed;
+}
+
+.label-high {
+  color: var(--risk-high);
+  border-color: #f0b9b9;
+  background: #fff1f1;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.error {
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.input,
+select {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.6rem;
+  width: 100%;
+}
+
+.preview {
+  width: 100%;
+  max-width: 200px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+@media (min-width: 760px) {
+  .grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .container {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+}
