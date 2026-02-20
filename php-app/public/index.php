@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\ApiAssessmentController;
 use App\Controllers\PageController;
+use App\Controllers\ValRiskController;
 use App\Core\Env;
 use App\Core\Request;
 use App\Core\Response;
@@ -13,6 +14,7 @@ use App\Services\AssessmentService;
 use App\Services\ImageService;
 use App\Services\OpenAIClient;
 use App\Services\StorageService;
+use App\Services\ValRiskService;
 
 require __DIR__ . '/../src/bootstrap.php';
 
@@ -22,6 +24,12 @@ ini_set('max_execution_time', '120');
 ini_set('memory_limit', '512M');
 error_reporting(E_ALL);
 set_time_limit(120);
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start([
+        'cookie_httponly' => true,
+        'cookie_samesite' => 'Lax',
+    ]);
+}
 
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 $requestPath = parse_url($requestUri, PHP_URL_PATH) ?: '/';
@@ -73,15 +81,18 @@ $openAiApiKey = Env::get('OPENAI_API_KEY', '') ?? '';
 $openAiModel = Env::get('OPENAI_MODEL', 'gpt-5.2') ?? 'gpt-5.2';
 $openAiTimeout = Env::int('OPENAI_TIMEOUT_SECONDS', 45);
 $openAiRetries = Env::int('OPENAI_RETRIES', 2);
+$supportPhone = Env::get('SUPPORT_PHONE', '') ?? '';
 
 $storage = new StorageService($tempStorage, $ttlHours);
 $imageService = new ImageService();
 $openAiClient = new OpenAIClient($openAiApiKey, $openAiModel, $openAiTimeout, $openAiRetries);
 $assessmentService = new AssessmentService($openAiClient);
+$valRiskService = new ValRiskService();
 $view = new View(__DIR__ . '/../views');
 
 $pageController = new PageController($view, $storage, $mainSiteUrl);
 $apiController = new ApiAssessmentController($storage, $imageService, $assessmentService);
+$valRiskController = new ValRiskController($view, $mainSiteUrl, $supportPhone, $valRiskService);
 
 $router = new Router();
 
@@ -94,6 +105,18 @@ $router->get('/woonkamer', fn (Request $request): Response => $pageController->r
 $router->get('/slaapkamer', fn (Request $request): Response => $pageController->roomAssessment($request, 'bedroom'));
 $router->get('/keuken', fn (Request $request): Response => $pageController->roomAssessment($request, 'kitchen'));
 $router->get('/contact', fn (Request $request): Response => $pageController->contact($request));
+// Valrisico module
+$router->get('/valrisico', fn (Request $request): Response => $valRiskController->welcome($request));
+$router->get('/valrisico/uitleg', fn (Request $request): Response => $valRiskController->howItWorks($request));
+$router->get('/valrisico/stap/{step}', fn (Request $request, array $params): Response => $valRiskController->step($request, (int) $params['step']));
+$router->post('/valrisico/antwoord', fn (Request $request): Response => $valRiskController->submitAnswer($request));
+$router->get('/valrisico/looptest', fn (Request $request): Response => $valRiskController->looptest($request));
+$router->post('/valrisico/looptest', fn (Request $request): Response => $valRiskController->submitLooptest($request));
+$router->get('/valrisico/resultaat', fn (Request $request): Response => $valRiskController->result($request));
+$router->get('/valrisico/oefeningen', fn (Request $request): Response => $valRiskController->exercises($request));
+$router->get('/valrisico/oefeningen/{slug}', fn (Request $request, array $params): Response => $valRiskController->exerciseDetail($request, (string) $params['slug']));
+$router->post('/valrisico/reset', fn (Request $request): Response => $valRiskController->reset($request));
+$router->get('/valrisico/print', fn (Request $request): Response => $valRiskController->printSummary($request));
 
 $router->post('/api/assessment/upload', fn (Request $request): Response => $apiController->upload($request));
 $router->post('/api/assessment/analyze', fn (Request $request): Response => $apiController->analyze($request));

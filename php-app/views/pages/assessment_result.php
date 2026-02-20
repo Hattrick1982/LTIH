@@ -134,6 +134,12 @@ $scoreMeterClass = $risk['className'] === 'label-low' ? 'score-meter-fill-low' :
     <p style="margin-bottom: 0;"><?= htmlspecialchars((string) ($disclaimerParagraphs[2] ?? ''), ENT_QUOTES) ?></p>
   </section>
 
+  <section class="card">
+    <h2>Wilt u ook uw valrisico checken?</h2>
+    <p class="muted">Duurt 2 tot 3 minuten. U krijgt meteen advies en oefeningen.</p>
+    <a href="/valrisico" class="btn">Start valrisico check</a>
+  </section>
+
   <section class="card no-print" style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
     <a href="/assessment/result/<?= htmlspecialchars($assessmentId, ENT_QUOTES) ?>/print" class="btn btn-secondary">Print checklist</a>
     <a href="/contact" class="btn">Plan adviesgesprek</a>

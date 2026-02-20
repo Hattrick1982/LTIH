@@ -99,16 +99,21 @@ final class RoomConfig
     public static function navItems(): array
     {
         return [
-            ['roomKey' => 'bathroom', 'label' => 'Badkamer', 'hint' => 'Check op glijgevaar, instap en extra houvast.', 'href' => '/assessment/new?room=bathroom'],
-            ['roomKey' => 'stairs_hall', 'label' => 'Trap en hal', 'hint' => 'Voorkom struikelen bij drempels, kleedjes en kabels.', 'href' => '/assessment/new?room=stairs_hall'],
-            ['roomKey' => 'living_room', 'label' => 'Woonkamer', 'hint' => 'Maak looproutes vrij en verbeter verlichting.', 'href' => '/woonkamer'],
-            ['roomKey' => 'bedroom', 'label' => 'Slaapkamer', 'hint' => 'Veilige route naar bed en toilet, ook \'s nachts.', 'href' => '/slaapkamer'],
-            ['roomKey' => 'kitchen', 'label' => 'Keuken', 'hint' => 'Grip, overzicht en minder valrisico bij draaien en reiken.', 'href' => '/keuken'],
+            ['roomKey' => 'valrisico', 'label' => 'Valpreventie check (2-3 min)', 'hint' => 'Beantwoord een paar vragen en krijg direct advies en korte oefeningen.', 'href' => '/valrisico'],
+            ['roomKey' => 'bathroom', 'label' => 'Badkamer', 'hint' => 'Bekijk waar het glad of onhandig is en hoe u meer houvast krijgt.', 'href' => '/assessment/new?room=bathroom'],
+            ['roomKey' => 'stairs_hall', 'label' => 'Trap en hal', 'hint' => 'Voorkom struikelen door drempels, kleedjes, kabels en weinig licht.', 'href' => '/assessment/new?room=stairs_hall'],
+            ['roomKey' => 'living_room', 'label' => 'Woonkamer', 'hint' => 'Maak looproutes vrij en zorg voor goede verlichting en veilige zitplekken.', 'href' => '/woonkamer'],
+            ['roomKey' => 'bedroom', 'label' => 'Slaapkamer', 'hint' => 'Maak de route naar bed en toilet veiliger, ook in het donker.', 'href' => '/slaapkamer'],
+            ['roomKey' => 'kitchen', 'label' => 'Keuken', 'hint' => 'Minder valrisico bij draaien, reiken en natte of gladde vloeren.', 'href' => '/keuken'],
         ];
     }
 
     public static function activeRoomKey(string $path, ?string $roomQuery): ?string
     {
+        if ($path === '/valrisico' || str_starts_with($path, '/valrisico/')) {
+            return 'valrisico';
+        }
+
         if ($path === '/assessment/new') {
             return self::isRoomType((string) $roomQuery) ? (string) $roomQuery : null;
         }

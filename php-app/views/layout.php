@@ -49,12 +49,12 @@ $navItems = isset($navItems) && is_array($navItems) ? $navItems : RoomConfig::na
 
             <div class="topnav-dropdown" data-desktop-dropdown>
               <button type="button" class="topnav-link topnav-dropdown-trigger <?= $activeRoomKey ? 'active' : '' ?>" aria-expanded="false" aria-controls="desktop-rooms-menu">
-                <span>Ruimtes</span>
+                <span>Veilig thuis</span>
                 <svg viewBox="0 0 16 16" aria-hidden="true" class="topnav-chevron">
                   <path d="M3.6 5.9L8 10.1l4.4-4.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
                 </svg>
               </button>
-              <div id="desktop-rooms-menu" class="topnav-dropdown-menu" aria-label="Ruimtekeuze">
+              <div id="desktop-rooms-menu" class="topnav-dropdown-menu" aria-label="Veilig thuis menu">
                 <?php foreach ($navItems as $room): ?>
                   <a href="<?= htmlspecialchars((string) $room['href'], ENT_QUOTES) ?>" class="topnav-dropdown-item <?= $activeRoomKey === $room['roomKey'] ? 'active' : '' ?>">
                     <span class="topnav-dropdown-title"><?= htmlspecialchars((string) $room['label'], ENT_QUOTES) ?></span>

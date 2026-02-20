@@ -21,6 +21,12 @@ Web:
 - `/assessment/new?room=...`
 - `/assessment/result/{assessmentId}`
 - `/assessment/result/{assessmentId}/print`
+- `/valrisico`
+- `/valrisico/stap/{n}`
+- `/valrisico/looptest`
+- `/valrisico/resultaat`
+- `/valrisico/oefeningen`
+- `/valrisico/oefeningen/{slug}`
 - `/woonkamer`
 - `/slaapkamer`
 - `/keuken`
@@ -33,10 +39,17 @@ API:
 - `DELETE /api/assessment/{assessmentId}`
 - `POST /api/assessment/{assessmentId}/delete` (compat)
 - `GET /api/assessment/{assessmentId}/checklist.pdf` (redirect naar print-view fallback)
+- `POST /valrisico/antwoord`
+- `POST /valrisico/looptest`
+- `POST /valrisico/reset`
 
 ## Belangrijkste features
 
 - Nederlands UI en flow behouden (Start, Ruimtes, Upload, Analyse, Resultaat, Print, Adviesgesprek).
+- Nieuwe module `Valrisico check` met 1-vraag-per-scherm wizard, optionele 4-meter looptest, resultaat (Laag/Matig/Hoog) en oefeningenbibliotheek.
+- Integratie tussen modules:
+  - Valrisico resultaat bevat CTA's naar ruimtechecks.
+  - Foto-assessment resultaat bevat CTA naar valrisico check.
 - Upload validatie: JPG/PNG, max 10MB, max 5 bestanden.
 - Image processing in PHP GD:
   - EXIF metadata gestript door re-encoding.
@@ -70,6 +83,7 @@ php -S 127.0.0.1:8080 -t public
 
 Open:
 - [http://127.0.0.1:8080/assessment](http://127.0.0.1:8080/assessment)
+- [http://127.0.0.1:8080/valrisico](http://127.0.0.1:8080/valrisico)
 
 ## Environment variabelen
 
@@ -79,6 +93,7 @@ Open:
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-5.2
 MAIN_SITE_URL=https://langerthuisinhuis.nl
+SUPPORT_PHONE=+31...
 TEMP_STORAGE_PATH=/tmp/ltih-assessment
 ASSESSMENT_TTL_HOURS=24
 OPENAI_TIMEOUT_SECONDS=45
@@ -109,6 +124,8 @@ Tests dekken minimaal:
 - schema validation
 - upload validation (type/size)
 - analyze endpoint met mocked analyzer
+- valrisico risicoregels (incl. looptest)
+- valrisico route smoke tests
 
 ## Docker (php-fpm + nginx)
 

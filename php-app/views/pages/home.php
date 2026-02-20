@@ -10,4 +10,13 @@
       <a class="btn btn-secondary" href="https://www.langerthuisinhuis.nl" target="_blank" rel="noreferrer">Naar langerthuisinhuis.nl</a>
     </div>
   </section>
+
+  <section class="card room-card">
+    <h2>Valrisico check</h2>
+    <p class="muted">Beantwoord een paar vragen. U krijgt meteen advies en korte oefeningen.</p>
+    <div class="actions" style="margin-top: 0.6rem;">
+      <a href="/valrisico" class="btn">Start valrisico check</a>
+      <a href="/valrisico/uitleg" class="btn btn-secondary">Hoe werkt het?</a>
+    </div>
+  </section>
 </div>
