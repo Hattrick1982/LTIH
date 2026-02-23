@@ -135,6 +135,22 @@ docker build -t ltih-assessment-php .
 docker run --rm -p 8080:8080 --env-file .env ltih-assessment-php
 ```
 
+## Schone Redeploy Vanaf Main
+
+Draai op de server:
+
+```bash
+cd /var/www
+curl -fsSL https://raw.githubusercontent.com/Hattrick1982/LTIH/main/php-app/bin/redeploy-clean-main.sh -o redeploy-clean-main.sh
+chmod +x redeploy-clean-main.sh
+APP_DIR=/var/www/ltih WEB_USER=www-data PHP_FPM_SERVICE=php8.2-fpm ./redeploy-clean-main.sh
+```
+
+Belangrijk:
+- Stel webroot in op `.../ltih/php-app/public`.
+- Script maakt eerst een backup map en clone daarna opnieuw vanaf `main`.
+- Gebruik `SKIP_RESTART=1` als je services handmatig wilt herstarten.
+
 ## Productie-notes
 
 - Geen secrets in git.
