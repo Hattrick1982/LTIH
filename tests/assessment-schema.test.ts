@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AssessmentResultSchema } from "@/lib/assessment/schema";
+import { AssessmentResultSchema, RoomTypeSchema } from "@/lib/assessment/schema";
 
 describe("AssessmentResultSchema", () => {
   it("accepteert een geldige payload", () => {
@@ -57,5 +57,11 @@ describe("AssessmentResultSchema", () => {
     };
 
     expect(() => AssessmentResultSchema.parse(payload)).toThrow();
+  });
+
+  it("accepteert nieuwe ruimtes", () => {
+    expect(RoomTypeSchema.parse("living_room")).toBe("living_room");
+    expect(RoomTypeSchema.parse("bedroom")).toBe("bedroom");
+    expect(RoomTypeSchema.parse("kitchen")).toBe("kitchen");
   });
 });

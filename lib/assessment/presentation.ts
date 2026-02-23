@@ -4,7 +4,7 @@ export function riskLabel(score: number) {
   }
 
   if (score < 70) {
-    return { label: "Middel risico", className: "label-medium" };
+    return { label: "Middelgroot risico", className: "label-medium" };
   }
 
   return { label: "Hoog risico", className: "label-high" };

@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AssessmentStepper } from "@/components/assessment/AssessmentStepper";
 import { DeleteAssessmentButton } from "@/components/assessment/DeleteAssessmentButton";
+import { IssuesAccordion, type AccordionIssue } from "@/components/assessment/IssuesAccordion";
 import { categoryLabel, riskLabel } from "@/lib/assessment/presentation";
+import { ASSESSMENT_DISCLAIMER_PARAGRAPHS } from "@/lib/assessment/disclaimer";
 import { readAssessmentRecord } from "@/lib/assessment/storage";
 
 export const runtime = "nodejs";
@@ -50,59 +53,54 @@ export default async function AssessmentResultPage({
 
   const { result } = assessment;
   const risk = riskLabel(result.overall_risk_score_0_100);
+  const riskLabelLower = `${risk.label.charAt(0).toLowerCase()}${risk.label.slice(1)}`;
+  const scoreMeterClass =
+    risk.className === "label-low"
+      ? "score-meter-fill-low"
+      : risk.className === "label-medium"
+        ? "score-meter-fill-medium"
+        : "score-meter-fill-high";
   const topIssues = [...result.hazards]
     .sort((a, b) => b.severity_1_5 * b.confidence_0_1 - a.severity_1_5 * a.confidence_0_1)
     .slice(0, 5);
+  const accordionIssues: AccordionIssue[] = topIssues.map((hazard, idx) => ({
+    id: `${hazard.category}-${idx}`,
+    title: categoryLabel(hazard.category),
+    severity: hazard.severity_1_5,
+    confidence: Math.round(hazard.confidence_0_1 * 100),
+    whatWeSee: hazard.what_we_see,
+    whyRisky: hazard.why_it_matters,
+    recommendedActions: hazard.suggested_actions.map(
+      (action) => `${action.action} (${action.effort}, kosten ${action.cost_band})`
+    ),
+    flagHumanFollowUp: hazard.needs_human_followup
+  }));
   const actionPlan = buildActionPlan(result.hazards);
 
   return (
     <div className="grid" style={{ gap: "1rem" }}>
+      <AssessmentStepper currentStep="result" />
       <section className="card">
-        <h1>Resultaat woonveiligheidsanalyse</h1>
-        <p className="muted">Assessment ID: {assessment.assessment_id}</p>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", flexWrap: "wrap" }}>
-          <strong style={{ fontSize: "2rem" }}>{result.overall_risk_score_0_100}/100</strong>
-          <span className={`badge ${risk.className}`}>{risk.label}</span>
+        <h1>Jouw woonveiligheidsresultaat</h1>
+        <p className="score-intro">
+          Je score is {result.overall_risk_score_0_100}/100: {riskLabelLower}. Hieronder zie je de belangrijkste
+          aandachtspunten en de eerste stappen om je woning veiliger te maken.
+        </p>
+        <div
+          className="score-meter"
+          role="img"
+          aria-label={`Risicoscore ${result.overall_risk_score_0_100} van 100: ${riskLabelLower}`}
+        >
+          <div
+            className={`score-meter-fill ${scoreMeterClass}`}
+            style={{ width: `${Math.max(0, Math.min(100, result.overall_risk_score_0_100))}%` }}
+          />
         </div>
       </section>
 
       <section className="card">
-        <h2>Top issues</h2>
-        {topIssues.length === 0 ? (
-          <p>Er zijn geen duidelijke risico's gedetecteerd op basis van de foto's.</p>
-        ) : (
-          <div className="grid" style={{ gap: "0.8rem" }}>
-            {topIssues.map((hazard, idx) => (
-              <article key={`${hazard.category}-${idx}`} className="card">
-                <p style={{ marginTop: 0 }}>
-                  <strong>{categoryLabel(hazard.category)}</strong> | Severity {hazard.severity_1_5}/5 | Confidence{" "}
-                  {(hazard.confidence_0_1 * 100).toFixed(0)}%
-                </p>
-                <p>
-                  <strong>Wat zien we:</strong> {hazard.what_we_see}
-                </p>
-                <p>
-                  <strong>Waarom riskant:</strong> {hazard.why_it_matters}
-                </p>
-                <p>
-                  <strong>Aanbevolen acties:</strong>
-                </p>
-                <ul>
-                  {hazard.suggested_actions.map((action) => (
-                    <li key={`${hazard.category}-${action.action}`}>
-                      {action.action} ({action.effort}, kosten {action.cost_band})
-                    </li>
-                  ))}
-                </ul>
-                {hazard.needs_human_followup ? (
-                  <p className="muted" style={{ marginBottom: 0 }}>
-                    Deze observatie vraagt mogelijk menselijke opvolging.
-                  </p>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        )}
+        <h2>Belangrijkste aandachtspunten</h2>
+        <IssuesAccordion issues={accordionIssues} />
       </section>
 
       <section className="card">
@@ -122,22 +120,31 @@ export default async function AssessmentResultPage({
       </section>
 
       {result.missing_info_questions.length > 0 ? (
-        <section className="card">
+        <section className="card questions-card">
           <h2>Vragen ter aanvulling</h2>
           <ul>
             {result.missing_info_questions.map((question) => (
               <li key={question}>{question}</li>
             ))}
           </ul>
+          <div className="questions-card-cta">
+            <p className="questions-card-cta-text">
+              Samen lopen we deze vragen door en krijg je een persoonlijk advies voor jouw situatie.
+            </p>
+            <Link href="/contact" className="btn btn-advice-cta">
+              Plan een adviesgesprek
+            </Link>
+          </div>
         </section>
       ) : null}
 
-      <section className="card">
+      <section className="card disclaimer-card">
         <p style={{ marginTop: 0 }}>
-          <strong>Disclaimer:</strong> {result.disclaimer}
+          <strong>Disclaimer:</strong> {ASSESSMENT_DISCLAIMER_PARAGRAPHS[0]}
         </p>
-        <p className="muted" style={{ marginBottom: 0 }}>
-          Deze output is informatief en vervangt geen medisch advies, diagnose of acute hulpverlening.
+        <p>{ASSESSMENT_DISCLAIMER_PARAGRAPHS[1]}</p>
+        <p style={{ marginBottom: 0 }}>
+          {ASSESSMENT_DISCLAIMER_PARAGRAPHS[2]}
         </p>
       </section>
 

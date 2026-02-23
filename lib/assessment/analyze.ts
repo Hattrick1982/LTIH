@@ -13,7 +13,20 @@ const SYSTEM_PROMPT = [
 ].join(" ");
 
 function roomLabel(roomType: RoomType) {
-  return roomType === "bathroom" ? "badkamer" : "trap/hal";
+  switch (roomType) {
+    case "bathroom":
+      return "badkamer";
+    case "stairs_hall":
+      return "trap of hal";
+    case "living_room":
+      return "woonkamer";
+    case "bedroom":
+      return "slaapkamer";
+    case "kitchen":
+      return "keuken";
+    default:
+      return "ruimte";
+  }
 }
 
 function buildUserInstruction(roomType: RoomType) {

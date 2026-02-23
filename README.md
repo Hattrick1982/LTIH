@@ -1,74 +1,143 @@
-# Foto-assessment Woonveiligheid (MVP 1)
+# LangerThuisinHuis Foto-assessment - PHP Rewrite
 
-MVP voor LangerThuisinHuis waarmee bewoners of mantelzorgers foto's uploaden en een AI-gestuurde risico-analyse ontvangen voor:
+Deze repository bevat nu een volledige PHP-versie van de foto-assessment app in `/Users/patrickvannuland/Documents/LTIH/Risico PHP/php-app`.
 
-- `bathroom`
-- `stairs_hall`
+De Node.js/Next.js implementatie blijft tijdelijk in de repo als referentie tijdens migratie, maar productie draait zonder Node runtime.
 
-## Functionaliteit
+## Gekozen architectuur
 
-- Begeleide uploadflow (`/assessment/new`) met ruimte-specifieke foto-prompts
-- Uploadvalidatie (JPG/PNG, max 10MB per foto, max 5 foto's)
-- Verplichte consent checkbox
-- Server-side beeldoptimalisatie met `sharp`
-  - EXIF metadata gestript
-  - resize naar max 1600px breed
-  - compressie toegepast
-- AI-analyse via OpenAI Responses API + Structured Outputs (Zod)
-- Resultaatpagina met:
-  - risicoscore + label
-  - top issues
-  - aanbevolen acties
-  - aanvullingsvragen
-  - disclaimer
-- Printbare checklist (`/assessment/result/[assessmentId]/print`)
-- Verwijderknop: verwijdert assessment + tijdelijke foto's
+Gekozen optie: **C) Plain PHP met micro-architectuur**.
 
-## API endpoints
+Korte motivatie:
+- De huidige app is functioneel compact (ongeveer 2.5k LOC, geen relationele database, tijdelijke storage).
+- Een lichte router + servicelaag in PHP levert snelle, transparante parity zonder framework-overhead.
+- Hierdoor is productie volledig Node-vrij en blijft route-compatibiliteit direct beheersbaar.
 
+## Functional parity (routes)
+
+Web:
+- `/`
+- `/assessment`
+- `/assessment/new?room=...`
+- `/assessment/result/{assessmentId}`
+- `/assessment/result/{assessmentId}/print`
+- `/valrisico`
+- `/valrisico/stap/{n}`
+- `/valrisico/looptest`
+- `/valrisico/resultaat`
+- `/valrisico/oefeningen`
+- `/valrisico/oefeningen/{slug}`
+- `/woonkamer`
+- `/slaapkamer`
+- `/keuken`
+- `/contact`
+
+API:
 - `POST /api/assessment/upload`
 - `POST /api/assessment/analyze`
-- `GET /api/assessment/[assessmentId]`
-- `DELETE /api/assessment/[assessmentId]`
-- `POST /api/assessment/[assessmentId]/delete` (compat)
+- `GET /api/assessment/{assessmentId}`
+- `DELETE /api/assessment/{assessmentId}`
+- `POST /api/assessment/{assessmentId}/delete` (compat)
+- `GET /api/assessment/{assessmentId}/checklist.pdf` (redirect naar print-view fallback)
+- `POST /valrisico/antwoord`
+- `POST /valrisico/looptest`
+- `POST /valrisico/reset`
 
-## Benodigde environment variables
+## Belangrijkste features
 
-- `OPENAI_API_KEY` (verplicht)
-- `OPENAI_MODEL` (optioneel, default: `gpt-5.2`)
-- `TEMP_STORAGE_PATH` (optioneel, default: systeem tmp map + `ltih-assessment`)
+- Nederlands UI en flow behouden (Start, Ruimtes, Upload, Analyse, Resultaat, Print, Adviesgesprek).
+- Nieuwe module `Valrisico check` met 1-vraag-per-scherm wizard, optionele 4-meter looptest, resultaat (Laag/Matig/Hoog) en oefeningenbibliotheek.
+- Integratie tussen modules:
+  - Valrisico resultaat bevat CTA's naar ruimtechecks.
+  - Foto-assessment resultaat bevat CTA naar valrisico check.
+- Upload validatie: JPG/PNG, max 10MB, max 5 bestanden.
+- Image processing in PHP GD:
+  - EXIF metadata gestript door re-encoding.
+  - resize max breedte 1600px.
+  - compressie (JPEG kwaliteit 82, PNG compressie 9).
+- Tijdelijke opslag in `TEMP_STORAGE_PATH`.
+- Delete endpoint verwijdert assessment + gekoppelde uploads.
+- Cleanup script voor TTL cleanup.
+- OpenAI Responses API integratie met structured JSON schema-validatie.
+- Accessibility toggle (`Tekst` / `A+`) via localStorage.
 
-Voorbeeld `.env.local`:
+## Vereisten
+
+- PHP `8.2+`
+- Extensies:
+  - `curl`
+  - `fileinfo`
+  - `gd`
+  - `json`
+  - `exif` (aanbevolen voor oriëntatiecorrectie)
+- Composer (voor autoload + PHPUnit)
+
+## Installatie lokaal
+
+```bash
+cd /Users/patrickvannuland/Documents/LTIH/Risico\ PHP/php-app
+cp .env.example .env
+composer install
+php -S 127.0.0.1:8080 -t public
+```
+
+Open:
+- [http://127.0.0.1:8080/assessment](http://127.0.0.1:8080/assessment)
+- [http://127.0.0.1:8080/valrisico](http://127.0.0.1:8080/valrisico)
+
+## Environment variabelen
+
+`/Users/patrickvannuland/Documents/LTIH/Risico PHP/php-app/.env`
 
 ```env
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-5.2
+MAIN_SITE_URL=https://langerthuisinhuis.nl
+SUPPORT_PHONE=+31...
 TEMP_STORAGE_PATH=/tmp/ltih-assessment
+ASSESSMENT_TTL_HOURS=24
+OPENAI_TIMEOUT_SECONDS=45
+OPENAI_RETRIES=2
 ```
 
-## Lokaal draaien
-
-1. Installeer dependencies:
-   ```bash
-   npm install
-   ```
-2. Start development server:
-   ```bash
-   npm run dev
-   ```
-3. Open:
-   - `http://localhost:3000/assessment`
-
-## Testen
+## Cleanup (TTL)
 
 ```bash
-npm run test
-npm run lint
-npm run build
+cd /Users/patrickvannuland/Documents/LTIH/Risico\ PHP/php-app
+php bin/assessment-cleanup.php
 ```
 
-## Privacy en beperking
+Cron voorbeeld (elk uur):
 
-- Geuploade foto's en analyses worden tijdelijk opgeslagen.
-- Via de verwijderknop worden assessment en geassocieerde foto's verwijderd.
-- De analyse is informatief en bevat geen medisch advies of diagnose.
+```cron
+0 * * * * cd /Users/patrickvannuland/Documents/LTIH/Risico\ PHP/php-app && /usr/bin/php bin/assessment-cleanup.php >> /tmp/assessment-cleanup.log 2>&1
+```
+
+## Tests
+
+```bash
+cd /Users/patrickvannuland/Documents/LTIH/Risico\ PHP/php-app
+composer test
+```
+
+Tests dekken minimaal:
+- schema validation
+- upload validation (type/size)
+- analyze endpoint met mocked analyzer
+- valrisico risicoregels (incl. looptest)
+- valrisico route smoke tests
+
+## Docker (php-fpm + nginx)
+
+```bash
+cd /Users/patrickvannuland/Documents/LTIH/Risico\ PHP/php-app
+docker build -t ltih-assessment-php .
+docker run --rm -p 8080:8080 --env-file .env ltih-assessment-php
+```
+
+## Productie-notes
+
+- Geen secrets in git.
+- Gebruik alleen environment variabelen voor keys/tokens.
+- Geef `storage` schrijfrechten aan de runtime-user (`www-data` in Docker).
+- Node runtime is niet nodig voor productie van deze PHP rewrite.
